@@ -128,7 +128,9 @@ describe('run: transparency', () => {
 
   it('keeps the exit status and the diagnostics when the reader closes the pipe early', async () => {
     const e = setup();
-    const code = `for (let i = 0; i < 5000; i++) console.log("line " + i); console.log(${JSON.stringify(TSC_ERR)}); process.exit(5)`;
+    // exitCode, not process.exit(): exiting right after a burst of writes can drop the
+    // command's own buffered stdout before it reaches the wrapper (Node documents it).
+    const code = `for (let i = 0; i < 5000; i++) console.log("line " + i); console.log(${JSON.stringify(TSC_ERR)}); process.exitCode = 5`;
     const child = spawn(process.execPath, ['--import', TSX, CLI, 'run', '--', ...node(code)], {
       cwd: e.project,
       env: e.env,
