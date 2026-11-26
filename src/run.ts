@@ -40,7 +40,7 @@ export interface RunResult {
 /**
  * Variables that make common tools keep colors when writing to a pipe. Only
  * set when the user has not set them, and only when our own stdout is a
- * terminal, so `rex-diagnostics run -- x > file` stays plain.
+ * terminal, so `rex-scry run -- x > file` stays plain.
  */
 export const COLOR_ENV: Record<string, string> = {
   FORCE_COLOR: '1',
@@ -105,7 +105,7 @@ export async function runCommand(opts: RunOptions): Promise<RunResult> {
   } catch (e) {
     // Never break the user's build because the store is unavailable.
     recording = false;
-    warn(`rex-diagnostics: cannot record this run: ${(e as Error).message}\n`);
+    warn(`rex-scry: cannot record this run: ${(e as Error).message}\n`);
   }
 
   const showStatus = opts.status && stdout.isTTY === true;
@@ -150,7 +150,7 @@ export async function runCommand(opts: RunOptions): Promise<RunResult> {
       fn();
     } catch (e) {
       parsing = false;
-      warn(`rex-diagnostics: stopped reading diagnostics for this run: ${(e as Error).message}\n`);
+      warn(`rex-scry: stopped reading diagnostics for this run: ${(e as Error).message}\n`);
     }
   };
 
@@ -202,7 +202,7 @@ export async function runCommand(opts: RunOptions): Promise<RunResult> {
 
   if (exit.spawnError) {
     const notFound = exit.spawnError.code === 'ENOENT';
-    warn(`rex-diagnostics: ${opts.argv[0]}: ${notFound ? 'command not found' : exit.spawnError.message}\n`);
+    warn(`rex-scry: ${opts.argv[0]}: ${notFound ? 'command not found' : exit.spawnError.message}\n`);
     const exitCode = notFound ? 127 : 126;
     if (recording) record(opts, runId, { status: 'failed_to_start', exitCode }, ingestor, warn);
     if (showStatus && !broken.out) stdout.write(statusSequence('error', `${opts.argv[0]}: ${notFound ? 'command not found' : 'cannot run'}`));
@@ -232,11 +232,11 @@ export async function runCommand(opts: RunOptions): Promise<RunResult> {
   if (opts.summary && stderr.isTTY) {
     const replaced = result?.replacedDiagnostics ?? 0;
     if (result && !result.kept && recording) {
-      warn('rex-diagnostics: a newer run of this command already finished; these results were discarded\n');
+      warn('rex-scry: a newer run of this command already finished; these results were discarded\n');
     } else if (found.length > 0) {
-      warn(`rex-diagnostics: ${summary} (rex-diagnostics list)\n`);
+      warn(`rex-scry: ${summary} (rex-scry list)\n`);
     } else if (replaced > 0) {
-      warn(`rex-diagnostics: no diagnostics (${replaced} from the previous run cleared)\n`);
+      warn(`rex-scry: no diagnostics (${replaced} from the previous run cleared)\n`);
     }
   }
   return { runId, exitCode, ...(signal ? { signal } : {}), diagnostics: found.length };
@@ -257,7 +257,7 @@ function record(
       opts.stateDir,
     );
   } catch (e) {
-    warn(`rex-diagnostics: cannot record this run: ${(e as Error).message}\n`);
+    warn(`rex-scry: cannot record this run: ${(e as Error).message}\n`);
     return undefined;
   }
 }

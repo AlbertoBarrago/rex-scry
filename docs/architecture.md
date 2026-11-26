@@ -5,7 +5,7 @@
 One short-lived process per command, no daemon. Every command (`run`, `list`, `next`, `open`, ...) reads or updates a JSON file per workspace under a lock, then exits.
 
 ```text
-rex-diagnostics run -- <command>
+rex-scry run -- <command>
    child stdout/stderr ──► passed through untouched to the terminal
             │ (copy)
             ▼
@@ -19,7 +19,7 @@ rex-diagnostics run -- <command>
                                    │
           ┌────────────────────────┼─────────────────────────┐
           ▼                        ▼                         ▼
-   CLI list/next/open     Rex action (rex.ui.pick)    nvim plugin (:RexDiagnostics)
+   CLI list/next/open     Rex action (rex.ui.pick)    nvim plugin (:RexScry)
           │                        │                         │
           └──── rex-nvim open FILE:LINE:COL ◄────────────────┘ (quickfix: own list)
 ```
@@ -41,7 +41,7 @@ rex-diagnostics run -- <command>
 | `src/cli.ts`, `src/doctor.ts` | Commands | I/O |
 | `src/ui/model.ts` | Panel rows, grouping, filters, cursor, viewport | yes |
 | `src/ui/*.tsx`, `src/ui/actions.ts` | Panel components (Ink) and its side effects | I/O |
-| `rex/rex-diagnostics.lua` | Rex actions: picker, next/prev, copy, clear | |
+| `rex/rex-scry.lua` | Rex actions: picker, next/prev, copy, clear | |
 | `nvim/` | Neovim plugin: quickfix list, auto-refresh | |
 
 ## Decisions
@@ -84,7 +84,7 @@ A run's `commandKey` is a hash of cwd + argv (or `--key`). Each run gets a seque
 
 ### D7. One JSON file per workspace, under a lock
 
-`$REX_DIAGNOSTICS_STATE_DIR`, else `$XDG_STATE_HOME/rex-diagnostics`, else `~/.local/state/rex-diagnostics`. The directory must belong to the user and is made `0700`; files are `0600`, and every new file (lock owner, temporary state) is created with `O_EXCL`, so a planted symlink makes the write fail instead of being followed.
+`$REX_SCRY_STATE_DIR`, else `$XDG_STATE_HOME/rex-scry`, else `~/.local/state/rex-scry`. The directory must belong to the user and is made `0700`; files are `0600`, and every new file (lock owner, temporary state) is created with `O_EXCL`, so a planted symlink makes the write fail instead of being followed.
 
 Writes take a `mkdir` lock that records its owner (pid, host), then rename a temporary file over the state. A lock is stale when its owner died on this host or it is older than 10 s; a waiter takes it over by renaming it to a name of its own first, so of two waiters only one can win (removing it directly would let both in). Waiters give up after 15 s. `clear --all-workspaces` deletes each file under its lock, so a run finishing at that moment cannot write it back. A run left `running` by a wrapper that died (SIGKILL, pane closed) is read as `interrupted` when its pid is gone.
 Why not SQLite or a daemon: the data is small (bounded below), access is rare and short, and a file needs nothing installed or running.
@@ -107,19 +107,19 @@ Retention applies to reads too: an expired run is not listed even before the nex
 
 ### D10. The Rex panel is the command palette
 
-`rex.ui.pick` gives a native, filterable, keyboard-first list in every connected Rex app, themed by the app. The Lua action never parses anything itself: it runs `rex-diagnostics list --json` with `rex.exec` and checks `schemaVersion`. Without rex-nvim it opens nvim in a split beside the focused pane, on the canonical path the CLI printed after validating it (not the stored name). The split's PATH is set with `/usr/bin/env` in its command, since only documented terminal options are used.
+`rex.ui.pick` gives a native, filterable, keyboard-first list in every connected Rex app, themed by the app. The Lua action never parses anything itself: it runs `rex-scry list --json` with `rex.exec` and checks `schemaVersion`. Without rex-nvim it opens nvim in a split beside the focused pane, on the canonical path the CLI printed after validating it (not the stored name). The split's PATH is set with `/usr/bin/env` in its command, since only documented terminal options are used.
 
 ### D11. Neovim pulls, it is never pushed to
 
-`:RexDiagnostics` runs `rex-diagnostics list --json` and owns one quickfix list, found again by id and replaced in place. A new list is appended at the end of the stack (`nr = "$"`), so lists after the current one survive; explicit loads make it the current list, background refreshes never change which list is current. Only diagnostics inside the workspace become items. Auto-refresh watches the state directory (`vim.uv.new_fs_event`, the directory is created by `rex-diagnostics path` first), refreshes only a list that already exists, reuses the directory and filters of the last explicit load, keeps the cursor on the same diagnostic, skips identical lists and drops responses older than the newest request. No new IPC: the CLI never connects to nvim.
+`:RexScry` runs `rex-scry list --json` and owns one quickfix list, found again by id and replaced in place. A new list is appended at the end of the stack (`nr = "$"`), so lists after the current one survive; explicit loads make it the current list, background refreshes never change which list is current. Only diagnostics inside the workspace become items. Auto-refresh watches the state directory (`vim.uv.new_fs_event`, the directory is created by `rex-scry path` first), refreshes only a list that already exists, reuses the directory and filters of the last explicit load, keeps the cursor on the same diagnostic, skips identical lists and drops responses older than the newest request. No new IPC: the CLI never connects to nvim.
 
 ### D12. Program status through OSC 7501
 
-`run` reports on the record id `rex-diagnostics` (not the root record, which belongs to the wrapped program): `working` at start, then `error` when errors were found, `done` otherwise, `idle` when interrupted. Only when stdout is a terminal, so redirected output stays byte-identical.
+`run` reports on the record id `rex-scry` (not the root record, which belongs to the wrapped program): `working` at start, then `error` when errors were found, `done` otherwise, `idle` when interrupted. Only when stdout is a terminal, so redirected output stays byte-identical.
 
 ### D13. A live panel beside the picker, with Ink
 
-The command-palette picker (D10) is for a quick jump. A build session wants something that stays open: `rex-diagnostics ui` is a TUI that follows the workspace while you fix things. It is built with Ink and React, like rex-usage, so both panels share their look (palette, banner, single-line rows that truncate instead of wrapping, a viewport centered on the cursor) and their patterns.
+The command-palette picker (D10) is for a quick jump. A build session wants something that stays open: `rex-scry ui` is a TUI that follows the workspace while you fix things. It is built with Ink and React, like rex-usage, so both panels share their look (palette, banner, single-line rows that truncate instead of wrapping, a viewport centered on the cursor) and their patterns.
 
 - Ink and React are loaded by a dynamic import in `cmdUi` only: `run`, `list` and the others never load them, so the wrapper's start-up time does not change.
 - `src/ui/model.ts` is pure (rows, grouping, filters, cursor anchored to the diagnostic id, viewport) and tested without a terminal; components only render; `src/ui/actions.ts` holds the side effects (open, copy, clear).

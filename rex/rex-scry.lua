@@ -1,29 +1,29 @@
--- rex-diagnostics: browse and open the diagnostics of the focused pane's
+-- rex-scry: browse and open the diagnostics of the focused pane's
 -- workspace from the Rex command palette.
 --
 -- Install:
---   cp "$(npm root -g)/rex-diagnostics/rex/rex-diagnostics.lua" ~/.config/rex/
---   echo 'require("rex-diagnostics")' >> ~/.config/rex/init.lua
+--   cp "$(npm root -g)/rex-scry/rex/rex-scry.lua" ~/.config/rex/
+--   echo 'require("rex-scry")' >> ~/.config/rex/init.lua
 --   rex config check && rex config reload
 --
 -- Then, in a pane sitting in your project:
---   ctrl+b d   pick a diagnostic and open it (rex_diagnostics)
---   ctrl+b j   open the next one (rex_diagnostics_next)
---   ctrl+b k   open the previous one (rex_diagnostics_prev)
---   ctrl+b D   open the live panel in a split beside the pane (rex_diagnostics_panel)
+--   ctrl+b d   pick a diagnostic and open it (rex_scry)
+--   ctrl+b j   open the next one (rex_scry_next)
+--   ctrl+b k   open the previous one (rex_scry_prev)
+--   ctrl+b D   open the live panel in a split beside the pane (rex_scry_panel)
 -- "Diagnostics: Copy…" and "Diagnostics: Clear" are in the command palette.
 --
 -- The workspace is found from the working directory the focused terminal
 -- reports (OSC 7: zsh, fish and most prompts report it). Nothing here parses
--- terminal output: diagnostics come from `rex-diagnostics list --json`.
+-- terminal output: diagnostics come from `rex-scry list --json`.
 
 -- Program to run. Use an absolute path if Rex still can't find it.
-local REX_DIAGNOSTICS_BIN = "rex-diagnostics"
+local REX_SCRY_BIN = "rex-scry"
 
 -- Rex runs commands with its own environment, which skips ~/.zshrc. Common
 -- user bin dirs are prepended so an `npm link`ed binary, rex-nvim and `node`
 -- are found, including node from version managers (volta, mise, asdf, fnm).
--- With nvm, set REX_DIAGNOSTICS_BIN above to an absolute path, or add nvm's
+-- With nvm, set REX_SCRY_BIN above to an absolute path, or add nvm's
 -- current bin directory here.
 local home = os.getenv("HOME") or ""
 local EXTRA_PATH = {
@@ -50,8 +50,8 @@ local SCHEMA_VERSION = 1
 local EX_UNAVAILABLE = 69
 
 local function fail(msg)
-  rex.log("warn", "rex-diagnostics: " .. msg)
-  error("rex-diagnostics: " .. msg, 0)
+  rex.log("warn", "rex-scry: " .. msg)
+  error("rex-scry: " .. msg, 0)
 end
 
 --- The focused terminal's working directory, from its OSC 7 report
@@ -68,10 +68,10 @@ end
 
 --- Runs the CLI with argv (no shell) in dir.
 local function cli(args, dir)
-  local argv = { REX_DIAGNOSTICS_BIN }
+  local argv = { REX_SCRY_BIN }
   for _, a in ipairs(args) do table.insert(argv, a) end
   local r, err = rex.exec(argv, { cwd = dir, env = env(), timeout = 30 })
-  if r == nil then fail("cannot run " .. REX_DIAGNOSTICS_BIN .. ": " .. tostring(err)) end
+  if r == nil then fail("cannot run " .. REX_SCRY_BIN .. ": " .. tostring(err)) end
   return r
 end
 
@@ -85,7 +85,7 @@ local function load(dir, severity)
   if not r.ok then fail(r.stderr ~= "" and r.stderr or ("list exited with " .. tostring(r.code))) end
   local data = rex.json.decode(r.stdout)
   if type(data) ~= "table" or data.schemaVersion ~= SCHEMA_VERSION then
-    fail("unexpected output from `list --json`; update rex-diagnostics.lua to match the CLI")
+    fail("unexpected output from `list --json`; update rex-scry.lua to match the CLI")
   end
   return data
 end
@@ -118,7 +118,7 @@ local function pick(data, title, confirm)
     summary = summary .. string.format(", first %d shown", MAX_ITEMS)
   end
   if #items == 0 then
-    rex.ui.pick{ title = title .. ": no diagnostics", items = { { id = "none", title = "Nothing captured yet", subtitle = "Run a build with: rex-diagnostics run -- <command>" } } }
+    rex.ui.pick{ title = title .. ": no diagnostics", items = { { id = "none", title = "Nothing captured yet", subtitle = "Run a build with: rex-scry run -- <command>" } } }
     return nil
   end
   local id = rex.ui.pick{ title = title .. " (" .. summary .. ")", placeholder = "Filter by file or message", confirm = confirm, items = items }
@@ -165,7 +165,7 @@ local function open(d, dir, ctx)
 end
 
 rex.action{
-  name        = "rex_diagnostics",
+  name        = "rex_scry",
   title       = "Diagnostics…",
   description = "Pick one of the workspace's captured diagnostics and open it in Neovim.",
   keywords    = "diagnostics errors warnings build lint test quickfix",
@@ -190,7 +190,7 @@ local function step(direction)
 end
 
 rex.action{
-  name        = "rex_diagnostics_next",
+  name        = "rex_scry_next",
   title       = "Diagnostics: Next",
   description = "Open the workspace's next diagnostic.",
   keywords    = "diagnostics next error",
@@ -198,7 +198,7 @@ rex.action{
 }
 
 rex.action{
-  name        = "rex_diagnostics_prev",
+  name        = "rex_scry_prev",
   title       = "Diagnostics: Previous",
   description = "Open the workspace's previous diagnostic.",
   keywords    = "diagnostics previous error",
@@ -206,14 +206,14 @@ rex.action{
 }
 
 rex.action{
-  name        = "rex_diagnostics_panel",
+  name        = "rex_scry_panel",
   title       = "Diagnostics: Panel",
   description = "Open the live diagnostics panel of the focused pane's workspace in a split beside it.",
   keywords    = "diagnostics panel tui errors warnings live",
   args        = { severity = "string?" },
   run         = function(ctx, args)
     local dir = focused_dir()
-    local command = { "/usr/bin/env", "PATH=" .. search_path(), REX_DIAGNOSTICS_BIN, "ui", "-C", dir }
+    local command = { "/usr/bin/env", "PATH=" .. search_path(), REX_SCRY_BIN, "ui", "-C", dir }
     if args.severity then
       table.insert(command, "--severity")
       table.insert(command, args.severity)
@@ -236,7 +236,7 @@ rex.action{
 }
 
 rex.action{
-  name        = "rex_diagnostics_copy",
+  name        = "rex_scry_copy",
   title       = "Diagnostics: Copy…",
   description = "Pick a diagnostic and copy it as file:line:col: severity: message.",
   keywords    = "diagnostics copy clipboard",
@@ -251,7 +251,7 @@ rex.action{
 }
 
 rex.action{
-  name        = "rex_diagnostics_clear",
+  name        = "rex_scry_clear",
   title       = "Diagnostics: Clear",
   description = "Clear the captured diagnostics of the focused pane's workspace.",
   keywords    = "diagnostics clear reset",
@@ -263,7 +263,7 @@ rex.action{
 }
 
 -- Change or remove these lines to pick your own keys.
-rex.bind("ctrl+b>d", "rex_diagnostics")
-rex.bind("ctrl+b>j", "rex_diagnostics_next")
-rex.bind("ctrl+b>k", "rex_diagnostics_prev")
-rex.bind("ctrl+b>shift+d", "rex_diagnostics_panel")
+rex.bind("ctrl+b>d", "rex_scry")
+rex.bind("ctrl+b>j", "rex_scry_next")
+rex.bind("ctrl+b>k", "rex_scry_prev")
+rex.bind("ctrl+b>shift+d", "rex_scry_panel")

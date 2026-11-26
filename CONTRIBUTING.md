@@ -5,20 +5,20 @@ Issues and pull requests are welcome. Keep changes small and in scope: one topic
 ## Setup
 
 ```sh
-git clone https://github.com/AlbertoBarrago/rex-diagnostics.git
-cd rex-diagnostics
+git clone https://github.com/AlbertoBarrago/rex-scry.git
+cd rex-scry
 npm install
 npm run typecheck
 npm test
 ```
 
-Node.js 22+. Neovim 0.10+ is needed for the quickfix test (it is skipped otherwise). Nothing needs a running Rex: tests use temporary directories, an isolated state directory (`REX_DIAGNOSTICS_STATE_DIR`) and stubs for rex-nvim and editors.
+Node.js 22+. Neovim 0.10+ is needed for the quickfix test (it is skipped otherwise). Nothing needs a running Rex: tests use temporary directories, an isolated state directory (`REX_SCRY_STATE_DIR`) and stubs for rex-nvim and editors.
 
 ```sh
 npm run dev -- list --json                                # run from source
 npx tsx --test test/parsers.test.ts                       # one file
 npx tsx --test --test-name-pattern="pretty" test/*.test.ts  # one test
-rex config check rex/rex-diagnostics.lua                  # validate the Rex action
+rex config check rex/rex-scry.lua                         # validate the Rex action
 ```
 
 ## Adding a parser

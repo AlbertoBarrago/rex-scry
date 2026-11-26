@@ -69,7 +69,7 @@ describe('ui command', () => {
   it('refuses to start without a terminal', () => {
     const r = spawnSync(process.execPath, ['--import', import.meta.resolve('tsx'), join(ROOT, 'src', 'cli.ts'), 'ui'], {
       cwd: tempDir(),
-      env: { ...process.env, REX_DIAGNOSTICS_STATE_DIR: tempDir() },
+      env: { ...process.env, REX_SCRY_STATE_DIR: tempDir() },
       encoding: 'utf8',
       input: '',
     });

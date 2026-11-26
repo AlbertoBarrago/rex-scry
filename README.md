@@ -1,22 +1,22 @@
-# rex-diagnostics
+# rex-scry
 
 **Every terminal error, one jump away.**
 
 <p align="center">
-  <img src="demo/rex-diagnostics.gif" width="900" alt="rex-diagnostics demo: tsc runs through the wrapper, list shows three errors, open jumps to user.ts line 8 column 10 in Neovim, :RexDiagnostics fills the quickfix list, and after a fix the rebuild replaces the old errors">
+  <img src="demo/rex-scry.gif" width="900" alt="rex-scry demo: tsc runs through the wrapper, list shows three errors, open jumps to user.ts line 8 column 10 in Neovim, :RexScry fills the quickfix list, and after a fix the rebuild replaces the old errors">
   <br>
-  <sub><a href="demo/rex-diagnostics.mp4">Full-resolution video (MP4)</a></sub>
+  <sub><a href="demo/rex-scry.mp4">Full-resolution video (MP4)</a></sub>
 </p>
 
-Compiler errors, test failures and lint warnings scroll past in terminal panes and are gone. To fix them you scroll back, read a path, and type it into your editor. rex-diagnostics reads them from the command's output as it runs, records them per workspace when it ends, and lets you list, filter and export them, or jump straight to the line in Neovim, from the shell, from the [Rex](https://www.superlogical.com/rex) command palette, or from nvim's quickfix list.
+Compiler errors, test failures and lint warnings scroll past in terminal panes and are gone. To fix them you scroll back, read a path, and type it into your editor. rex-scry reads them from the command's output as it runs, records them per workspace when it ends, and lets you list, filter and export them, or jump straight to the line in Neovim, from the shell, from the [Rex](https://www.superlogical.com/rex) command palette, or from nvim's quickfix list.
 
 ```console
-$ rex-diagnostics run -- npx tsc -p .
+$ rex-scry run -- npx tsc -p .
 src/user.ts(42,13): error TS18048: 'user' is possibly 'undefined'.
 src/api.ts(18,5): error TS2339: Property 'id' does not exist on type 'Session'.
-rex-diagnostics: 2 errors (rex-diagnostics list)
+rex-scry: 2 errors (rex-scry list)
 
-$ rex-diagnostics list
+$ rex-scry list
 DIAGNOSTICS  2 errors
 
 src/api.ts
@@ -27,7 +27,7 @@ src/user.ts
   2  ERROR    src/user.ts:42:13  TS18048 tsc
               'user' is possibly 'undefined'.
 
-$ rex-diagnostics open 2        # nvim in Rex, cursor on 42:13
+$ rex-scry open 2        # nvim in Rex, cursor on 42:13
 ```
 
 Fix, run the same command again, and the old diagnostics are replaced, not piled up.
@@ -39,66 +39,66 @@ It runs locally, sends nothing anywhere, never edits your files, and stores only
 Requires **Node.js 22+**. Rex, [rex-nvim](https://github.com/AlbertoBarrago/rex-nvim) and Neovim 0.10+ are optional.
 
 ```sh
-npm install -g github:AlbertoBarrago/rex-diagnostics   # builds on install
-rex-diagnostics doctor
+npm install -g github:AlbertoBarrago/rex-scry   # builds on install
+rex-scry doctor
 ```
 
 Or from a clone, which the Rex action and Neovim plugin below can point at:
 
 ```sh
-git clone https://github.com/AlbertoBarrago/rex-diagnostics.git ~/Projects/rex-diagnostics
-cd ~/Projects/rex-diagnostics
+git clone https://github.com/AlbertoBarrago/rex-scry.git ~/Projects/rex-scry
+cd ~/Projects/rex-scry
 npm install          # also builds dist/ through the prepare script
-npm link             # or: ln -s "$PWD/dist/cli.js" ~/.local/bin/rex-diagnostics
-rex-diagnostics doctor
+npm link             # or: ln -s "$PWD/dist/cli.js" ~/.local/bin/rex-scry
+rex-scry doctor
 ```
 
 ### Rex action (optional)
 
 ```sh
-cp rex/rex-diagnostics.lua ~/.config/rex/
-echo 'require("rex-diagnostics")' >> ~/.config/rex/init.lua
+cp rex/rex-scry.lua ~/.config/rex/
+echo 'require("rex-scry")' >> ~/.config/rex/init.lua
 rex config check && rex config reload
 ```
 
 | Key | Action | Does |
 | --- | --- | --- |
-| `ctrl+b d` | `rex_diagnostics` | Pick a diagnostic of the focused pane's workspace in the command palette, open it |
-| `ctrl+b j` / `ctrl+b k` | `rex_diagnostics_next` / `_prev` | Open the next / previous one |
-| `ctrl+b D` | `rex_diagnostics_panel` | Open the live panel (`rex-diagnostics ui`) in a split beside the pane |
+| `ctrl+b d` | `rex_scry` | Pick a diagnostic of the focused pane's workspace in the command palette, open it |
+| `ctrl+b j` / `ctrl+b k` | `rex_scry_next` / `_prev` | Open the next / previous one |
+| `ctrl+b D` | `rex_scry_panel` | Open the live panel (`rex-scry ui`) in a split beside the pane |
 | palette | "Diagnostics: Copy…" | Copy one as `file:line:col: severity: message` (`pbcopy`) |
 | palette | "Diagnostics: Clear" | Clear the workspace's diagnostics |
 
-`rex do rex_diagnostics severity=error` shows errors only. The workspace comes from the directory the focused terminal reports (OSC 7, which zsh, fish and most prompts send). Opening goes through rex-nvim; without it, nvim opens in a split beside the pane.
+`rex do rex_scry severity=error` shows errors only. The workspace comes from the directory the focused terminal reports (OSC 7, which zsh, fish and most prompts send). Opening goes through rex-nvim; without it, nvim opens in a split beside the pane.
 
-Rex runs actions without your shell profile. The action looks for `rex-diagnostics` and `node` in `~/.local/bin`, `~/.npm-global/bin`, Homebrew, and the shims of volta, mise, asdf and fnm. With nvm, set `REX_DIAGNOSTICS_BIN` at the top of the `.lua` file to the absolute path of `rex-diagnostics` (`which rex-diagnostics`), or add nvm's bin directory to `EXTRA_PATH`.
+Rex runs actions without your shell profile. The action looks for `rex-scry` and `node` in `~/.local/bin`, `~/.npm-global/bin`, Homebrew, and the shims of volta, mise, asdf and fnm. With nvm, set `REX_SCRY_BIN` at the top of the `.lua` file to the absolute path of `rex-scry` (`which rex-scry`), or add nvm's bin directory to `EXTRA_PATH`.
 
 ### Neovim plugin (optional)
 
-With lazy.nvim (point `dir` at your clone, or at `$(npm root -g)/rex-diagnostics/nvim` for a global install):
+With lazy.nvim (point `dir` at your clone, or at `$(npm root -g)/rex-scry/nvim` for a global install):
 
 ```lua
-local dir = vim.fn.expand("~/Projects/rex-diagnostics/nvim")
+local dir = vim.fn.expand("~/Projects/rex-scry/nvim")
 return {
-  { dir = dir, name = "rex-diagnostics", lazy = false, cond = vim.uv.fs_stat(dir) ~= nil },
+  { dir = dir, name = "rex-scry", lazy = false, cond = vim.uv.fs_stat(dir) ~= nil },
 }
 ```
 
-Without a plugin manager: `vim.opt.rtp:append(vim.fn.expand("~/Projects/rex-diagnostics/nvim"))`.
+Without a plugin manager: `vim.opt.rtp:append(vim.fn.expand("~/Projects/rex-scry/nvim"))`.
 
-- `:RexDiagnostics [filters]` loads the workspace's diagnostics into a quickfix list of their own and opens the window; then `:cnext`, `:cprev`, `:cc N` as usual. Filters are CLI flags: `:RexDiagnostics --severity error`.
+- `:RexScry [filters]` loads the workspace's diagnostics into a quickfix list of their own and opens the window; then `:cnext`, `:cprev`, `:cc N` as usual. Filters are CLI flags: `:RexScry --severity error`.
 - The list refreshes by itself when a run in the workspace finishes, with the same directory and filters, keeping the cursor on the same diagnostic. It is replaced in place: other quickfix lists (`:make`, `:grep`, LSP) and their history are untouched.
 - Only files inside the workspace become quickfix entries; the message says how many were left out.
-- `:RexDiagnosticsClear` empties it and clears the stored diagnostics.
-- `require("rex-diagnostics").setup({ auto_refresh = true, open = true, cmd = { "rex-diagnostics" } })`.
+- `:RexScryClear` empties it and clears the stored diagnostics.
+- `require("rex-scry").setup({ auto_refresh = true, open = true, cmd = { "rex-scry" } })`.
 
 ### Uninstall
 
 ```sh
-rex-diagnostics clear --all-workspaces # first: removes stored diagnostics
-npm uninstall -g rex-diagnostics       # or npm unlink -g, or remove the ~/.local/bin symlink
-rm ~/.config/rex/rex-diagnostics.lua   # and the require line in ~/.config/rex/init.lua
-rm -rf ~/.local/state/rex-diagnostics  # or $XDG_STATE_HOME/rex-diagnostics
+rex-scry clear --all-workspaces # first: removes stored diagnostics
+npm uninstall -g rex-scry       # or npm unlink -g, or remove the ~/.local/bin symlink
+rm ~/.config/rex/rex-scry.lua   # and the require line in ~/.config/rex/init.lua
+rm -rf ~/.local/state/rex-scry  # or $XDG_STATE_HOME/rex-scry
 ```
 
 Remove the nvim spec or `rtp` line if you added one.
@@ -106,15 +106,15 @@ Remove the nvim spec or `rtp` line if you added one.
 ## Usage
 
 ```sh
-rex-diagnostics run [--key K] [--parser LIST] [--no-status] [--no-color] [-q] [--] COMMAND [ARGS...]
-rex-diagnostics list [--severity LIST] [--source LIST] [--file TEXT] [--group file|source|none]
-rex-diagnostics list --json | --format plain
-rex-diagnostics next | prev [filters] [--open] [--json]
-rex-diagnostics open N|ID [filters] [--print] [--no-editor] [--allow-outside]
-rex-diagnostics clear [--run ID | --all-workspaces]
-rex-diagnostics ui [--severity error|warning]   # live panel
-rex-diagnostics path        # this workspace's state file
-rex-diagnostics doctor
+rex-scry run [--key K] [--parser LIST] [--no-status] [--no-color] [-q] [--] COMMAND [ARGS...]
+rex-scry list [--severity LIST] [--source LIST] [--file TEXT] [--group file|source|none]
+rex-scry list --json | --format plain
+rex-scry next | prev [filters] [--open] [--json]
+rex-scry open N|ID [filters] [--print] [--no-editor] [--allow-outside]
+rex-scry clear [--run ID | --all-workspaces]
+rex-scry ui [--severity error|warning]   # live panel
+rex-scry path        # this workspace's state file
+rex-scry doctor
 ```
 
 Every command takes `-C DIR` to act for another directory's workspace.
@@ -122,15 +122,15 @@ Every command takes `-C DIR` to act for another directory's workspace.
 - **`run`** passes the command's stdout and stderr through byte for byte, inherits stdin, and exits with the command's status (or dies from the same signal), even when you pipe it into `head`. `--` is optional when the command does not start with `-`. `--key` groups runs: a finished run replaces the diagnostics of earlier runs with the same key (default: same directory and same command line); a rerun that comes back clean says how many it cleared. `--parser tsc,eslint` limits parsing to those parsers.
 - **`list`** numbers the entries and ends with where they come from (a run in progress, the last run, its exit status); files that no longer exist are marked. `open N` uses that number with the same filters, or a diagnostic id (or a unique prefix of 4 or more characters).
 - **`next` / `prev`** move a cursor stored per workspace and stop at the ends (exit 1), like `:cnext`. When the diagnostic under the cursor gets fixed, they continue from where it was.
-- **`open`** checks the path (it must exist and lie inside the workspace, after resolving symlinks), then hands it to rex-nvim as a `rex-nvim://open/...?line=&column=` link, else to `$VISUAL`/`$EDITOR`. With neither, it prints the location and exits 69. `--no-editor` skips `$EDITOR` (for callers without a terminal). `REX_DIAGNOSTICS_REX_NVIM` names the rex-nvim binary; set it to an empty value to never use rex-nvim.
+- **`open`** checks the path (it must exist and lie inside the workspace, after resolving symlinks), then hands it to rex-nvim as a `rex-nvim://open/...?line=&column=` link, else to `$VISUAL`/`$EDITOR`. With neither, it prints the location and exits 69. `--no-editor` skips `$EDITOR` (for callers without a terminal). `REX_SCRY_REX_NVIM` names the rex-nvim binary; set it to an empty value to never use rex-nvim.
 
 The **workspace** is the enclosing Git checkout of the directory, else the directory itself. Diagnostics from different workspaces never mix; each one keeps the run (id, command, cwd, Rex pane) it came from.
 
-Tip: make the wrapper the default for a project's scripts, e.g. `"typecheck": "rex-diagnostics run -- tsc -p ."` in `package.json`, or an alias such as `alias rd='rex-diagnostics run --'`.
+Tip: make the wrapper the default for a project's scripts, e.g. `"typecheck": "rex-scry run -- tsc -p ."` in `package.json`, or an alias such as `alias rd='rex-scry run --'`.
 
 ### Live panel
 
-`rex-diagnostics ui` (or `ctrl+b D` in Rex) opens a panel that follows the workspace: it refreshes the moment a run finishes, shows the run in progress or the last one, and keeps the cursor on the same diagnostic across rebuilds. It runs in the alternate screen, so quitting gives your scrollback back.
+`rex-scry ui` (or `ctrl+b D` in Rex) opens a panel that follows the workspace: it refreshes the moment a run finishes, shows the run in progress or the last one, and keeps the cursor on the same diagnostic across rebuilds. It runs in the alternate screen, so quitting gives your scrollback back.
 
 | Key | Does |
 | --- | --- |
@@ -151,7 +151,7 @@ While a wrapped command runs, its tab shows Rex's working spinner; when it ends,
 
 ### For scripts and agents
 
-`rex-diagnostics list --json` is the stable contract (no decorative text, same state gives the same bytes):
+`rex-scry list --json` is the stable contract (no decorative text, same state gives the same bytes):
 
 ```json
 {
@@ -174,7 +174,7 @@ While a wrapped command runs, its tab shows Rex's working spinner; when it ends,
 
 Lines and columns are one-based. `file` is absolute; `relativeFile` is present when the file is inside the workspace. `severity` is `error`, `warning`, `info` or `hint`; run `status` is `running`, `completed`, `interrupted` or `failed_to_start`. `--format plain` prints `FILE:LINE:COL: SEVERITY: MESSAGE [CODE]`, one per line, which Vim's default `errorformat` reads.
 
-Claude Code, Codex or any agent can read this without an integration: "run `rex-diagnostics list --json` and fix the errors".
+Claude Code, Codex or any agent can read this without an integration: "run `rex-scry list --json` and fix the errors".
 
 ## Supported tools
 
@@ -199,7 +199,7 @@ The generic parser only accepts paths that exist, and only on lines no other par
 
 ## Known limits
 
-- Only commands started through `rex-diagnostics run` are captured: Rex has no supported way to read a command's output passively (see [docs/research.md](docs/research.md)).
+- Only commands started through `rex-scry run` are captured: Rex has no supported way to read a command's output passively (see [docs/research.md](docs/research.md)).
 - The command writes into pipes, not a terminal, so tools that check for one may print differently (progress bars disappear; tsc picks its plain or pretty format depending on its version and the color variables, and both are parsed). Colors are kept through `FORCE_COLOR`, `CLICOLOR_FORCE`, `CARGO_TERM_COLOR` and `PY_COLORS` (only those you have not set yourself).
 - `kill -INT` sent to the wrapper alone is not forwarded (Ctrl-C reaches the command directly); use `kill -TERM`. A command killed by a signal Node cannot raise on itself (`SIGPIPE`) ends the wrapper with status 128+N instead.
 - Diagnostics are recorded when the command ends. Watch modes (`tsc --watch`, `vitest`, `cargo watch`) never end, so their diagnostics are not recorded; `list` shows the run as in progress.

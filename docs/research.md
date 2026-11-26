@@ -1,6 +1,6 @@
 # Research
 
-Findings that shaped rex-diagnostics, checked on 2026-11-26 against Rex `0.1.0-snapshot.2588` (commit `ccf7e69`), its CLI help (`rex --help`, `rex api list`, `rex api describe`), the built-in agent guide (`rex skill show`) and the official documentation at <https://www.superlogical.com/rex/docs> (pages cited below). Rex is in beta: re-check these points when the platform moves.
+Findings that shaped rex-scry, checked on 2026-11-26 against Rex `0.1.0-snapshot.2588` (commit `ccf7e69`), its CLI help (`rex --help`, `rex api list`, `rex api describe`), the built-in agent guide (`rex skill show`) and the official documentation at <https://www.superlogical.com/rex/docs> (pages cited below). Rex is in beta: re-check these points when the platform moves.
 
 ## What Rex offers that matters here
 
@@ -11,9 +11,9 @@ Findings that shaped rex-diagnostics, checked on 2026-11-26 against Rex `0.1.0-s
 - **`com.superlogical.terminal.format`** (what `rex capture` uses) returns the rendered screen and scrollback as text, HTML or VT. Reading it is screen scraping: it sees wrapped lines, redraws and whatever else is on screen, has no notion of which command printed what, and the scrollback silently drops old lines (about 64 MiB per terminal).
 - **`data.connect`** gives a ticket for a "data connection" that "streams a block's content as it changes, such as a terminal's output", with subprotocol `rex.data.terminal.v1`. The subprotocol itself is not documented in the public docs, and it is the renderer's feed for a whole block, not per command.
 
-Conclusion: passive capture would mean scraping the screen or reverse-engineering an undocumented stream. Both are excluded by the project's rules. **Ingestion uses an explicit wrapper**, `rex-diagnostics run -- <command>`, which sees the command's real byte streams, its exit status and its signals.
+Conclusion: passive capture would mean scraping the screen or reverse-engineering an undocumented stream. Both are excluded by the project's rules. **Ingestion uses an explicit wrapper**, `rex-scry run -- <command>`, which sees the command's real byte streams, its exit status and its signals.
 
-### What Rex does document and rex-diagnostics uses
+### What Rex does document and rex-scry uses
 
 | Capability | Source | Used for |
 | --- | --- | --- |
@@ -25,12 +25,12 @@ Conclusion: passive capture would mean scraping the screen or reverse-engineerin
 | `rex.exec(argv, opts)`: runs a program without a shell | <https://www.superlogical.com/rex/docs/reference/lua> | The Lua action calls the CLI (`io.popen`/`os.execute` raise errors in Rex Lua) |
 | `pwd` block method (OSC 7 report) | `rex api list`, `rex block call -b … pwd` | Finding the focused pane's workspace from the Lua action |
 | `rex.session.new_split` with a terminal layout | Lua reference, rex-usage | Fallback editor split when rex-nvim is absent |
-| `rex config check FILE` | CLI help | Validating `rex/rex-diagnostics.lua` |
+| `rex config check FILE` | CLI help | Validating `rex/rex-scry.lua` |
 
 Observed details:
 
 - `pwd` answers `{"pwd":"file://host/Users/x/projects/foo", ...}`: a URL, percent-encoded, spelled as the shell reported it. On macOS that spelling can differ in case from the disk (`projects` vs `Projects`), so workspace ids are computed from `realpath` (physical, on-disk spelling).
-- A `rex.action` runs `rex.exec` with Rex's own environment, which does not load `~/.zshrc`. The author's plugins prepend common bin directories (`~/.local/bin`, `~/.npm-global/bin`, Homebrew); rex-diagnostics does the same.
+- A `rex.action` runs `rex.exec` with Rex's own environment, which does not load `~/.zshrc`. The author's plugins prepend common bin directories (`~/.local/bin`, `~/.npm-global/bin`, Homebrew); rex-scry does the same.
 - `rex.ui.pick` cannot run inside `rex.on` handlers, `pcall`, or actions invoked with `rex.invoke`. Actions bound to keys and run with `rex do` can use it.
 - OSC 7501 rules that matter: each report replaces its record; `working` is dropped at the next shell prompt, `done`/`error` survive it; `msg` and `title` are base64, single-line, at most 2,048 decoded bytes; an `id` addresses a child record so the wrapped program's own root record is untouched.
 
@@ -56,7 +56,7 @@ Then the app is switched to that session (`session.select`, needs Remote Control
 
 `FILE:LINE:COL` parsing prefers a name that exists as given, so a path containing `:` still works. Lines and columns are one-based.
 
-Decision: rex-diagnostics calls `rex-nvim open "<abs path>:<line>:<col>"` as a subprocess (an argument list, no shell). It does not read rex-nvim's registry or talk to nvim's RPC socket itself: that would duplicate rex-nvim's routing and couple us to its private file format.
+Decision: rex-scry calls `rex-nvim open "<abs path>:<line>:<col>"` as a subprocess (an argument list, no shell). It does not read rex-nvim's registry or talk to nvim's RPC socket itself: that would duplicate rex-nvim's routing and couple us to its private file format.
 
 ## Neovim side
 
@@ -75,7 +75,7 @@ None of them captures diagnostics per command run, keeps them per workspace, or 
 
 ## Constraints and assumptions
 
-1. **No passive capture.** Only commands started through `rex-diagnostics run` are captured. Shell integration that wraps every command automatically was considered (a `preexec` hook) and rejected for the MVP: it changes every command's stdio from a terminal to a pipe, which alters many programs' behavior.
+1. **No passive capture.** Only commands started through `rex-scry run` are captured. Shell integration that wraps every command automatically was considered (a `preexec` hook) and rejected for the MVP: it changes every command's stdio from a terminal to a pipe, which alters many programs' behavior.
 2. **Pipes, not a pseudo-terminal.** The wrapped command writes into pipes, so tools that check `isatty` change behavior (tsc switches to its plain format; progress bars disappear). Colors are kept by setting `FORCE_COLOR`, `CLICOLOR_FORCE`, `CARGO_TERM_COLOR` and `PY_COLORS` when the user has not set them and the wrapper's own stdout is a terminal (`--no-color` disables this). A PTY would need a native module (node-pty), against the minimal-dependency rule.
 3. **Signals.** Keyboard SIGINT/SIGQUIT already reach the command (same foreground process group), so the wrapper waits instead of forwarding a second copy. SIGTERM and SIGHUP sent to the wrapper are forwarded. A command killed by a signal makes the wrapper re-raise the same signal, so the shell sees the same status.
 4. **The panel is the command palette.** Rex has no API for custom panes with their own UI other than running a program in a terminal block. `rex.ui.pick` is native, keyboard-first, themed by the app, and filterable, so it is the panel. A TUI in a split would duplicate it.

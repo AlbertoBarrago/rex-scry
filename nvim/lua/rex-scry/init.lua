@@ -1,4 +1,4 @@
---- rex-diagnostics: load the diagnostics captured by `rex-diagnostics run` into
+--- rex-scry: load the diagnostics captured by `rex-scry run` into
 --- a quickfix list of their own.
 ---
 --- The plugin only reads: it asks the CLI for `list --json` (the documented,
@@ -17,14 +17,14 @@
 local M = {}
 
 local SCHEMA_VERSION = 1
-local TITLE = "rex-diagnostics"
+local TITLE = "rex-scry"
 
 M.config = {
   --- Command that runs the CLI (a list, never passed through a shell).
-  cmd = { "rex-diagnostics" },
+  cmd = { "rex-scry" },
   --- Refresh the list when a run finishes in this workspace (only once the list exists).
   auto_refresh = true,
-  --- Open the quickfix window after :RexDiagnostics when there is something to show.
+  --- Open the quickfix window after :RexScry when there is something to show.
   open = true,
 }
 
@@ -92,7 +92,7 @@ local function apply(result, select)
       skipped = skipped + 1
     end
   end
-  local what = { items = items, title = TITLE, context = { rex_diagnostics = true, workspace = result.workspace.root } }
+  local what = { items = items, title = TITLE, context = { rex_scry = true, workspace = result.workspace.root } }
   local id = our_list()
   if id then
     local old = vim.fn.getqflist({ id = id, items = 0, idx = 0 })
@@ -158,7 +158,7 @@ local function call(args, dir, on_done, wait)
 end
 
 local function notify(msg, level)
-  vim.notify("rex-diagnostics: " .. msg, level or vim.log.levels.INFO)
+  vim.notify("rex-scry: " .. msg, level or vim.log.levels.INFO)
 end
 
 --- Watches the workspace's state file and refreshes our list when it changes,
@@ -229,7 +229,7 @@ function M.load(opts)
     end
     local decoded_ok, result = pcall(vim.json.decode, out)
     if not decoded_ok or type(result) ~= "table" or result.schemaVersion ~= SCHEMA_VERSION then
-      notify("unexpected output from `rex-diagnostics list --json`", vim.log.levels.ERROR)
+      notify("unexpected output from `rex-scry list --json`", vim.log.levels.ERROR)
       return
     end
     if not opts.refresh then
