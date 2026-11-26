@@ -1,0 +1,4 @@
+=================================== FAILURES ===================================
+/work/py/tests/test_math.py:5: assert 3 == 4
+=========================== short test summary info ============================
+FAILED tests/test_math.py::test_add - assert 3 == 4

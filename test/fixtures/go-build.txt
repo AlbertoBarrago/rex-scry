@@ -1,0 +1,4 @@
+# fx
+./main.go:4:2: declared and not used: x
+./main.go:5:2: undefined: fmt
+./main.go:5:14: undefined: y

@@ -1,0 +1,10 @@
+
+/work/app/src/config.ts
+   3:7   error    'unused' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  12:1   warning  Unexpected console statement                 no-console
+
+/work/app/src/my file.ts
+  1:1  error  Parsing error: Unexpected token )
+
+✖ 3 problems (2 errors, 1 warning)
+

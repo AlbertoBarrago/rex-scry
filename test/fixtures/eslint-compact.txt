@@ -1,0 +1,4 @@
+/work/app/src/config.ts: line 3, col 7, Error - 'unused' is assigned a value but never used. (@typescript-eslint/no-unused-vars)
+/work/app/src/config.ts: line 12, col 1, Warning - Unexpected console statement. (no-console)
+
+2 problems

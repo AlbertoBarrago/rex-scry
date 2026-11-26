@@ -1,0 +1,41 @@
+[96msrc/chain.ts[0m:[93m2[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'number'.
+
+[7m2[0m export const a: A = { inner: { value: "no" } };
+[7m [0m [91m                               ~~~~~[0m
+
+  [96msrc/chain.ts[0m:[93m1[0m:[93m24[0m - The expected type comes from property 'value' which is declared here on type '{ value: number; }'
+    [7m1[0m interface A { inner: { value: number } }
+    [7m [0m [96m                       ~~~~~[0m
+
+[96msrc/chain.ts[0m:[93m4[0m:[93m14[0m - [91merror[0m[90m TS2322: [0mType '(x: { id: string; }) => void' is not assignable to type 'Fn'.
+  Types of parameters 'x' and 'x' are incompatible.
+    Type '{ id: number; }' is not assignable to type '{ id: string; }'.
+      Types of property 'id' are incompatible.
+        Type 'number' is not assignable to type 'string'.
+
+[7m4[0m export const f: Fn = (x: { id: string }) => {};
+[7m [0m [91m             ~[0m
+
+[96msrc/user.ts[0m:[93m4[0m:[93m10[0m - [91merror[0m[90m TS18048: [0m'user' is possibly 'undefined'.
+
+[7m4[0m   return user.name;
+[7m [0m [91m         ~~~~[0m
+
+[96msrc/user.ts[0m:[93m6[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'number'.
+
+[7m6[0m const n: number = "x";
+[7m [0m [91m      ~[0m
+
+[96msrc/with space.ts[0m:[93m1[0m:[93m14[0m - [91merror[0m[90m TS2322: [0mType 'number' is not assignable to type 'string'.
+
+[7m1[0m export const v: string = 42;
+[7m [0m [91m             ~[0m
+
+
+Found 5 errors in 3 files.
+
+Errors  Files
+     2  src/chain.ts[90m:2[0m
+     2  src/user.ts[90m:4[0m
+     1  src/with space.ts[90m:1[0m
+

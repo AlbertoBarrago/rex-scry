@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0
+rootdir: /work/py
+collected 3 items
+
+tests/test_math.py F.F                                                   [100%]
+
+=================================== FAILURES ===================================
+___________________________________ test_add ___________________________________
+
+    def test_add():
+>       assert add(1, 2) == 4
+E       assert 3 == 4
+E        +  where 3 = add(1, 2)
+
+tests/test_math.py:5: AssertionError
+_________________________________ test_helper __________________________________
+
+    def test_helper():
+>       helper("x")
+
+tests/test_math.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = 'x'
+
+    def helper(value):
+>       raise ValueError(f"bad {value}")
+E       ValueError: bad x
+
+src/mathlib.py:3: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_math.py::test_add - assert 3 == 4
+FAILED tests/test_math.py::test_helper - ValueError: bad x
+========================= 2 failed, 1 passed in 0.03s ==========================

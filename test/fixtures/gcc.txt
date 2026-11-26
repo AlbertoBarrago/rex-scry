@@ -1,0 +1,7 @@
+main.c:3:7: error: incompatible pointer to integer conversion initializing 'int' with an expression of type 'char[2]' [-Wint-conversion]
+    3 |   int x = "s";
+      |       ^   ~~~
+main.c:4:10: error: use of undeclared identifier 'y'
+    4 |   return y;
+      |          ^
+2 errors generated.

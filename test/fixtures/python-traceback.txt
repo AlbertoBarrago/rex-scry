@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/work/py/app.py", line 4, in <module>
+    helper()
+    ~~~~~~^^
+  File "/work/py/app.py", line 2, in helper
+    raise ValueError("bad input")
+ValueError: bad input
