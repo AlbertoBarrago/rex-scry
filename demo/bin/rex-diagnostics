@@ -1,0 +1,3 @@
+#!/bin/sh
+# Demo shim: the built CLI of this checkout.
+exec node "$(cd "$(dirname "$0")/../.." && pwd)/dist/cli.js" "$@"
