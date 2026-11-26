@@ -1,0 +1,52 @@
+{
+  "name": "rex-diagnostics",
+  "version": "0.1.0",
+  "description": "Capture compiler, linter and test diagnostics from Rex terminal panes, list them, and jump to them in Neovim",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test test/*.test.ts",
+    "prepare": "npm run build"
+  },
+  "author": "Alberto Barrago",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "rex-diagnostics": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "rex",
+    "nvim"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "rex",
+    "diagnostics",
+    "quickfix",
+    "neovim",
+    "typescript",
+    "eslint",
+    "cargo",
+    "pytest",
+    "cli",
+    "terminal"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlbertoBarrago/rex-diagnostics.git"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "@types/react": "^19.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "ink": "^8.0.0",
+    "react": "^19.3.1"
+  }
+}
