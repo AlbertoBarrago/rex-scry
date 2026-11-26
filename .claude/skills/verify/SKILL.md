@@ -29,7 +29,7 @@ Smoke flows (always):
 
 1. Capture: in a temp project with `src/user.ts` (5 lines), run `node dist/cli.js run --key build -- node -e 'console.error("src/user.ts(4,10): error TS18048: x"); process.exit(2)'`. Expected: the line is printed on stderr, exit status 2, `list --json` shows one diagnostic with `line: 4`, `column: 10`, `relativeFile: "src/user.ts"`.
 2. Rerun replaces: `node dist/cli.js run --key build -- node -e 'process.exit(0)'` (same key, the "fixed" build). Expected: exit 0, `list --json` has no diagnostics and one run.
-3. Open: capture again, then `open 1` with the stub. Expected: the stub logs `open` and `<abs path>:4:10`.
+3. Open: capture again, then `open 1` with the stub. Expected: the stub logs `open` and `rex-nvim://open<abs path>?line=4&column=10` (path percent-encoded).
 4. Must fail: `node dist/cli.js run` with no command. Expected: exit 64 and a usage message.
 
 Flows for the changed area: parsers (run a fixture through `run -- cat test/fixtures/<file>` and inspect `list`), Rex action (`rex do <copy> --action rex_scry_next -b <test block>` in a Rex test window, see CLAUDE.md), nvim plugin (`test/nvim.test.ts`).
