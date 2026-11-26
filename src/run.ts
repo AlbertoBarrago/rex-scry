@@ -159,16 +159,21 @@ export async function runCommand(opts: RunOptions): Promise<RunResult> {
     const sink = ingestor.stream();
     return new Promise((resolve) => {
       from.on('data', (chunk: Buffer) => {
-        if (!broken[which] && !to.write(chunk)) {
+        if (to.destroyed) broken[which] = true;
+        // On Linux a pipe write is synchronous: EPIPE is raised inside write(),
+        // before any listener added after it could hear it. Pause only when the
+        // destination is still alive, or the child's output would stop being read.
+        if (!broken[which] && !to.write(chunk) && !broken[which] && !to.destroyed) {
           from.pause();
           const resume = (): void => {
             to.off('drain', resume);
             to.off('error', resume);
+            to.off('close', resume);
             from.resume();
           };
-          // A pipe that breaks while we wait for drain must not leave the child blocked.
           to.once('drain', resume);
           to.once('error', resume);
+          to.once('close', resume);
         }
         guard(() => sink.push(chunk));
       });

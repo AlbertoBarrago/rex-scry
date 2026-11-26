@@ -135,12 +135,14 @@ describe('run: transparency', () => {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     // Like `| head -1`: read once, then close our end.
+    let stderr = '';
+    child.stderr.on('data', (b: Buffer) => (stderr += b.toString()));
     child.stdout.once('data', () => child.stdout.destroy());
     const status = await new Promise((resolve) => child.once('exit', (c) => resolve(c)));
-    assert.equal(status, 5);
+    assert.equal(status, 5, stderr);
     const json = JSON.parse(cli(e, ['list', '--json']).stdout);
-    assert.equal(json.runs[0].status, 'completed');
-    assert.equal(json.diagnostics.length, 1);
+    assert.equal(json.runs[0].status, 'completed', stderr);
+    assert.equal(json.diagnostics.length, 1, `wrapper stderr: ${stderr}`);
   });
 
   it('keeps running and keeps the exit status when output breaks a parser', () => {
