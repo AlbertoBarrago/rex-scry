@@ -156,7 +156,7 @@ export function App({ workspace, stateDir, initialFilter }: Props) {
   });
 
   const counts = countBySeverity(all);
-  const emptyText = all.length === 0 ? 'No diagnostics. Run a build with: rex-diagnostics run -- <command>' : `No ${filter}s. Press a to show all.`;
+  const emptyText = all.length === 0 ? 'No diagnostics. Run a build with: rex-scry run -- <command>' : `No ${filter}s. Press a to show all.`;
 
   return (
     <Box flexDirection="column" paddingX={1} height={height}>

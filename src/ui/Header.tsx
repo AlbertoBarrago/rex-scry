@@ -6,13 +6,13 @@ import type { Counts, Filter, Grouping } from './model.js';
 import { SEVERITY_COLOR } from './model.js';
 
 const BANNER = [
-  '█▀█ █▀▀ ▀▄▀ ╱╱ █▀▄ █ ▄▀█ █▀▀ █▄ █ █▀█ █▀ ▀█▀ █ █▀▀ █▀',
-  '█▀▄ ██▄ █ █ ╱╱ █▄▀ █ █▀█ █▄█ █ ▀█ █▄█ ▄█  █  █ █▄▄ ▄█',
+  '█▀█ █▀▀ ▀▄▀ ╱╱ █▀ █▀▀ █▀█ █▄█',
+  '█▀▄ ██▄ █ █ ╱╱ ▄█ █▄▄ █▀▄  █ ',
 ];
 /** Vertical gradient, one color per banner row (the rex-usage palette). */
 const GRADIENT = ['#ff5fd7', '#8787ff'];
 /** The two-row banner needs this many columns; narrower panes get the one-line title. */
-const BANNER_WIDTH = 58;
+const BANNER_WIDTH = Math.max(...BANNER.map((line) => [...line].length));
 
 interface Props {
   root: string;
@@ -56,7 +56,7 @@ function RunLine({ runs, tick, now }: { runs: readonly Run[]; tick: number; now:
     );
   }
   const last = runs.filter((r) => r.status !== 'running').sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0))[0];
-  if (!last) return <Text dimColor>no runs yet · rex-diagnostics run -- &lt;command&gt;</Text>;
+  if (!last) return <Text dimColor>no runs yet · rex-scry run -- &lt;command&gt;</Text>;
   const ok = last.status === 'completed' && last.exitCode === 0;
   const how =
     last.status === 'interrupted'
@@ -94,7 +94,7 @@ export function Header({ root, counts, runs, filter, grouping, tick, now, width,
           </Box>
         ) : (
           <Text bold color={GRADIENT[0]}>
-            REX<Text color={GRADIENT[1]}>//DIAGNOSTICS</Text>
+            REX<Text color={GRADIENT[1]}>//SCRY</Text>
           </Text>
         )}
         <Box flexDirection="column" alignItems="flex-end" flexShrink={1} marginLeft={2}>

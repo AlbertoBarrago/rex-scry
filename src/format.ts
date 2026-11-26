@@ -53,7 +53,7 @@ export function runLines(runs: readonly Run[], now: number, color: boolean): str
   return lines;
 }
 
-/** The human listing, numbered so `rex-diagnostics open N` can pick an entry. */
+/** The human listing, numbered so `rex-scry open N` can pick an entry. */
 export function formatText(
   diags: readonly Diagnostic[],
   opts: { color: boolean; group: GroupBy; runs?: readonly Run[]; now?: number; missing?: (file: string) => boolean },
@@ -64,7 +64,7 @@ export function formatText(
   const summary = diags.length ? summarize(diags) : '';
   lines.push(`${paint(opts.color, '1', header)}${summary ? `  ${summary}` : ''}`);
   if (diags.length === 0) {
-    lines.push('', '  No diagnostics. Run a build through `rex-diagnostics run -- <command>`.');
+    lines.push('', '  No diagnostics. Run a build through `rex-scry run -- <command>`.');
     if (footer.length) lines.push('', ...footer);
     return `${lines.join('\n')}\n`;
   }

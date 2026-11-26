@@ -16,7 +16,7 @@ export function fixture(name: string): string {
 
 /** A fresh temp dir (physical path), with the given files created in it. */
 export function tempDir(files: Record<string, string> = {}): string {
-  const dir = realpathSync.native(mkdtempSync(join(tmpdir(), 'rexdiag-')));
+  const dir = realpathSync.native(mkdtempSync(join(tmpdir(), 'rex-scry-')));
   for (const [name, content] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, name)), { recursive: true });
     writeFileSync(join(dir, name), content);

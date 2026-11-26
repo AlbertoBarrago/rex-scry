@@ -8,14 +8,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
-- `rex-diagnostics run -- COMMAND`: runs a command with stdout, stderr, stdin, exit status and signals preserved, and captures its diagnostics.
+- `rex-scry run -- COMMAND`: runs a command with stdout, stderr, stdin, exit status and signals preserved, and captures its diagnostics.
 - Parsers for TypeScript (`tsc`, plain and pretty), ESLint (stylish, compact, unix), Rust (cargo, rustc, test panics), pytest and Python tracebacks, and a generic `file:line[:col]: message` fallback.
 - Workspace-scoped storage with run lifecycle (running, completed, interrupted, failed to start), supersession of earlier runs of the same command, deduplication, and retention limits.
 - `list` (text, plain, JSON schema 1), `next`/`prev`, `open` (rex-nvim, else `$VISUAL`/`$EDITOR`), `clear`, `path`, `doctor`.
 - Rex actions: diagnostics picker in the command palette, next/previous, copy, clear; progress reported with OSC 7501.
-- Neovim plugin: `:RexDiagnostics` loads a quickfix list of its own, replaced in place and refreshed when a run finishes; `:RexDiagnosticsClear`.
+- Neovim plugin: `:RexScry` loads a quickfix list of its own, replaced in place and refreshed when a run finishes; `:RexScryClear`.
 - `run` accepts the command without `--`; `list` ends with where its diagnostics come from; `next`/`prev` continue past a fixed diagnostic; a clean rerun reports how many diagnostics it cleared.
-- `rex-diagnostics ui`: a live, colored panel (Ink) that follows the workspace, with filters, grouping, open, copy and clear; `ctrl+b D` opens it beside the pane in Rex.
+- `rex-scry ui`: a live, colored panel (Ink) that follows the workspace, with filters, grouping, open, copy and clear; `ctrl+b D` opens it beside the pane in Rex.
 - Python warnings and `SyntaxError`; tracebacks point at the innermost frame of the project instead of installed packages.
 
 ### Fixed before release (from two independent reviews)

@@ -82,8 +82,8 @@ export function openLocation(
   env: NodeJS.ProcessEnv = process.env,
   opts: { editor?: boolean } = {},
 ): OpenedWith {
-  // REX_DIAGNOSTICS_REX_NVIM names the rex-nvim binary; set to an empty string, it disables rex-nvim.
-  const rexNvim = env.REX_DIAGNOSTICS_REX_NVIM ?? which('rex-nvim', env.PATH);
+  // REX_SCRY_REX_NVIM names the rex-nvim binary; set to an empty string, it disables rex-nvim.
+  const rexNvim = env.REX_SCRY_REX_NVIM ?? which('rex-nvim', env.PATH);
   if (rexNvim) {
     const r = spawnSync(rexNvim, ['open', rexNvimUrl(file, d.line, d.column)], { stdio: ['ignore', 'inherit', 'inherit'], env });
     if (r.error) throw new Error(`rex-nvim failed: ${r.error.message}`);

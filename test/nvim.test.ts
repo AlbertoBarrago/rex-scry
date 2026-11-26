@@ -18,7 +18,7 @@ const skip = !v ? 'nvim not installed' : v[0] === 0 && v[1] < 10 ? `nvim ${v.joi
 
 /** argv of a build that prints these tsc lines on stderr. */
 function build(lines: string[]): string[] {
-  return ['rex-diagnostics', 'run', '--key', 'build', '--', process.execPath, '-e', `for (const l of ${JSON.stringify(lines)}) console.error(l)`];
+  return ['rex-scry', 'run', '--key', 'build', '--', process.execPath, '-e', `for (const l of ${JSON.stringify(lines)}) console.error(l)`];
 }
 
 describe('neovim quickfix', { skip }, () => {
@@ -26,10 +26,10 @@ describe('neovim quickfix', { skip }, () => {
     const project = tempDir({ '.git/HEAD': '', 'src/a.ts': 'x\ny\n', 'src/b.ts': 'z\n', 'src/c.ts': 'w\n' });
     const outside = tempDir({ 'secret.ts': 's\n' });
     const bin = tempDir();
-    // A `rex-diagnostics` on PATH that runs this checkout's source.
-    writeFileSync(join(bin, 'rex-diagnostics'), `#!/bin/sh\nexec '${process.execPath}' --import '${TSX}' '${CLI}' "$@"\n`);
-    chmodSync(join(bin, 'rex-diagnostics'), 0o755);
-    const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, REX_DIAGNOSTICS_STATE_DIR: tempDir() };
+    // A `rex-scry` on PATH that runs this checkout's source.
+    writeFileSync(join(bin, 'rex-scry'), `#!/bin/sh\nexec '${process.execPath}' --import '${TSX}' '${CLI}' "$@"\n`);
+    chmodSync(join(bin, 'rex-scry'), 0o755);
+    const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, REX_SCRY_STATE_DIR: tempDir() };
 
     const [cmd, ...args] = build([
       'src/a.ts(2,1): error TS1: first',
@@ -44,7 +44,7 @@ describe('neovim quickfix', { skip }, () => {
     writeFileSync(
       script,
       `
-local rd = require("rex-diagnostics")
+local rd = require("rex-scry")
 rd.setup({ auto_refresh = false, open = false })
 local out = {}
 -- Two unrelated lists; going back to the first must not cost us the second.
@@ -87,6 +87,6 @@ io.stdout:write(vim.json.encode(out))
     assert.equal(out.same_id, true);
     assert.equal(out.count, 3);
     assert.equal(out.idx_text, 'second [tsc TS2]');
-    assert.deepEqual(out.titles, ['one', 'two', 'rex-diagnostics']);
+    assert.deepEqual(out.titles, ['one', 'two', 'rex-scry']);
   });
 });

@@ -3,7 +3,7 @@
 # Prints its path. Usage: dir=$(sh demo/setup.sh)
 set -eu
 repo=$(cd "$(dirname "$0")/.." && pwd)
-base="${TMPDIR:-/tmp}/rex-diagnostics-demo"
+base="${TMPDIR:-/tmp}/rex-scry-demo"
 rm -rf "$base"
 mkdir -p "$base/app/src" "$base/state" "$base/bin"
 # The demo's editor: the real nvim without the user's config, with this repo's

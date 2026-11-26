@@ -16,18 +16,18 @@ const EX_UNAVAILABLE = 69;
 
 class UsageError extends Error {}
 
-const HELP = `rex-diagnostics: every terminal error, one jump away.
+const HELP = `rex-scry: every terminal error, one jump away.
 
 Usage:
-  rex-diagnostics run [options] -- COMMAND [ARGS...]   run COMMAND, capture its diagnostics
-  rex-diagnostics list [filters] [--json|--format F]  list the workspace's diagnostics
-  rex-diagnostics next|prev [filters] [--open]       step through them
-  rex-diagnostics open N|ID [filters] [--print]      open one in Neovim (rex-nvim) or $EDITOR
-                    [--no-editor] [--allow-outside]
-  rex-diagnostics ui [--severity error|warning]       live panel: browse, filter, open, copy, clear
-  rex-diagnostics clear [--run ID | --all-workspaces]
-  rex-diagnostics path                               print the workspace's state file
-  rex-diagnostics doctor                             check the setup
+  rex-scry run [options] -- COMMAND [ARGS...]   run COMMAND, capture its diagnostics
+  rex-scry list [filters] [--json|--format F]   list the workspace's diagnostics
+  rex-scry next|prev [filters] [--open]         step through them
+  rex-scry open N|ID [filters] [--print]        open one in Neovim (rex-nvim) or $EDITOR
+                [--no-editor] [--allow-outside]
+  rex-scry ui [--severity error|warning]        live panel: browse, filter, open, copy, clear
+  rex-scry clear [--run ID | --all-workspaces]
+  rex-scry path                                 print the workspace's state file
+  rex-scry doctor                               check the setup
 
 Common options:
   -C, --cwd DIR        act for the workspace of DIR (default: current directory)
@@ -99,7 +99,7 @@ const RUN_VALUE_OPTIONS = new Set(['-C', '--cwd', '--parser', '--key']);
 /**
  * Splits `run` arguments into its own options and the command. `--` is the
  * unambiguous form; without it the command starts at the first word that is
- * not an option or an option's value (`rex-diagnostics run npm test`).
+ * not an option or an option's value (`rex-scry run npm test`).
  */
 export function splitRunArgs(args: string[]): { own: string[]; argv: string[] } {
   const sep = args.indexOf('--');
@@ -137,7 +137,7 @@ function cmdRun(args: string[]): Promise<number> {
     },
     strict: true,
   });
-  if (argv.length === 0) throw new UsageError('run needs a command, e.g. rex-diagnostics run -- npm run build');
+  if (argv.length === 0) throw new UsageError('run needs a command, e.g. rex-scry run -- npm run build');
   let parsers;
   try {
     parsers = selectParsers(list(values.parser));
@@ -215,7 +215,7 @@ function openOne(d: Diagnostic, root: string, allowOutside: boolean, editor = tr
   try {
     openLocation(d, file, process.env, { editor });
   } catch (e) {
-    process.stderr.write(`rex-diagnostics: ${safe((e as Error).message)}\n`);
+    process.stderr.write(`rex-scry: ${safe((e as Error).message)}\n`);
     process.stdout.write(`${safe(location(d, file))}\n`);
     return EX_UNAVAILABLE;
   }
@@ -233,7 +233,7 @@ function cmdStep(args: string[], direction: 1 | -1): number {
   applyFilters([], values);
   const step = stepCursor(ws, (state) => applyFilters(currentDiagnostics(state), values), direction);
   if (!step) {
-    process.stderr.write(`rex-diagnostics: no ${direction === 1 ? 'next' : 'previous'} diagnostic\n`);
+    process.stderr.write(`rex-scry: no ${direction === 1 ? 'next' : 'previous'} diagnostic\n`);
     return 1;
   }
   const d = step.diagnostic;
@@ -263,7 +263,7 @@ function cmdOpen(args: string[]): number {
   }
   const d = diags[index];
   if (!d) {
-    process.stderr.write(`rex-diagnostics: no diagnostic ${safe(ref)}\n`);
+    process.stderr.write(`rex-scry: no diagnostic ${safe(ref)}\n`);
     return 1;
   }
   updateState(ws, (state) => {
@@ -284,13 +284,13 @@ function cmdClear(args: string[]): number {
   });
   if (values['all-workspaces']) {
     const n = resetAll();
-    process.stderr.write(`rex-diagnostics: removed ${n} workspace${n === 1 ? '' : 's'}\n`);
+    process.stderr.write(`rex-scry: removed ${n} workspace${n === 1 ? '' : 's'}\n`);
     return 0;
   }
   const ws = workspaceOf(values.cwd);
   const n = clearRuns(ws, values.run);
   if (values.run && n === 0) {
-    process.stderr.write(`rex-diagnostics: no run ${safe(values.run)}\n`);
+    process.stderr.write(`rex-scry: no run ${safe(values.run)}\n`);
     return 1;
   }
   return 0;
@@ -363,13 +363,13 @@ export async function main(argv: string[]): Promise<number> {
   } catch (e) {
     const err = e as Error & { code?: string };
     const usage = e instanceof UsageError || (typeof err.code === 'string' && err.code.startsWith('ERR_PARSE_ARGS'));
-    process.stderr.write(`rex-diagnostics: ${safe(err.message)}\n`);
-    if (usage) process.stderr.write('Run `rex-diagnostics help` for usage.\n');
+    process.stderr.write(`rex-scry: ${safe(err.message)}\n`);
+    if (usage) process.stderr.write('Run `rex-scry help` for usage.\n');
     return usage ? EX_USAGE : 1;
   }
 }
 
-/** `rex-diagnostics list | head`: the reader left, nothing to report. */
+/** `rex-scry list | head`: the reader left, nothing to report. */
 function ignoreEpipe(): void {
   for (const stream of [process.stdout, process.stderr]) {
     stream.on('error', (e: NodeJS.ErrnoException) => {

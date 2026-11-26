@@ -4,11 +4,11 @@ import type { Diagnostic } from './types.js';
  * Program Status Protocol (OSC 7501), documented by Rex at
  * https://www.superlogical.com/rex/docs/build/program-status. Rex shows these
  * records as tab spinners and session-picker indicators; terminals that do
- * not know the sequence ignore it. Only the record with id `rex-diagnostics`
+ * not know the sequence ignore it. Only the record with id `rex-scry`
  * is touched, so the wrapped program's own root record is left alone.
  */
-const RECORD_ID = 'rex-diagnostics';
-const APP = 'rex-diagnostics';
+const RECORD_ID = 'rex-scry';
+const APP = 'rex-scry';
 /** Protocol limit on the encoded `msg`, checked before sending. */
 const MAX_MSG_ENCODED = 2732;
 

@@ -19,11 +19,11 @@ interface Env {
 function setup(files: Record<string, string> = {}): Env {
   const project = tempDir({ '.git/HEAD': '', 'src/user.ts': 'a\nb\nc\nreturn user.name;\n', ...files });
   const state = tempDir();
-  const env: NodeJS.ProcessEnv = { ...process.env, REX_DIAGNOSTICS_STATE_DIR: state, NO_COLOR: '1' };
+  const env: NodeJS.ProcessEnv = { ...process.env, REX_SCRY_STATE_DIR: state, NO_COLOR: '1' };
   delete env.REX_BLOCK;
   delete env.VISUAL;
   delete env.EDITOR;
-  delete env.REX_DIAGNOSTICS_REX_NVIM;
+  delete env.REX_SCRY_REX_NVIM;
   // No rex-nvim from the developer's machine: tests pass their own stub when they need one.
   env.PATH = (env.PATH ?? '').split(':').filter((p) => !existsSync(join(p, 'rex-nvim'))).join(':');
   return { state, project, env };
@@ -245,7 +245,7 @@ describe('navigation and opening', () => {
   it('opens through rex-nvim with an unambiguous rex-nvim:// link, no shell', () => {
     const e = withTwo();
     const log = stub(e);
-    const r = cli(e, ['open', '1'], { env: { REX_DIAGNOSTICS_REX_NVIM: join(e.state, 'rex-nvim-stub') } });
+    const r = cli(e, ['open', '1'], { env: { REX_SCRY_REX_NVIM: join(e.state, 'rex-nvim-stub') } });
     assert.equal(r.status, 0, r.stderr);
     assert.deepEqual(readFileSync(log, 'utf8').split('\n').filter(Boolean), ['open', `rex-nvim://open${join(e.project, 'src/user.ts')}?line=4&column=10`]);
   });
@@ -253,10 +253,10 @@ describe('navigation and opening', () => {
   it('falls back to $EDITOR with the position', () => {
     const e = withTwo();
     const log = stub(e);
-    // A rex-nvim on PATH that would fail the test if used: an empty REX_DIAGNOSTICS_REX_NVIM disables it.
+    // A rex-nvim on PATH that would fail the test if used: an empty REX_SCRY_REX_NVIM disables it.
     const bin = tempDir({ 'rex-nvim': '#!/bin/sh\nexit 3\n' });
     chmodSync(join(bin, 'rex-nvim'), 0o755);
-    const r = cli(e, ['open', '2'], { env: { EDITOR: join(e.state, 'rex-nvim-stub'), REX_DIAGNOSTICS_REX_NVIM: '', PATH: `${bin}:${e.env.PATH}` } });
+    const r = cli(e, ['open', '2'], { env: { EDITOR: join(e.state, 'rex-nvim-stub'), REX_SCRY_REX_NVIM: '', PATH: `${bin}:${e.env.PATH}` } });
     assert.equal(r.status, 0, r.stderr);
     assert.deepEqual(readFileSync(log, 'utf8').split('\n').filter(Boolean), ['+2', join(e.project, 'src/b.ts')]);
   });

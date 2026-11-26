@@ -9,7 +9,7 @@ import { resolveWorkspace } from './workspace.js';
 type Level = 'ok' | 'warn' | 'fail';
 
 /**
- * Reports what works and what is missing. Only `fail` (rex-diagnostics
+ * Reports what works and what is missing. Only `fail` (rex-scry
  * itself cannot work) makes it exit non-zero: Rex, rex-nvim and nvim are
  * optional.
  */
@@ -50,17 +50,17 @@ export function doctor(args: string[]): number {
   );
 
   const config = join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'rex');
-  const luaInstalled = existsSync(join(config, 'rex-diagnostics.lua'));
+  const luaInstalled = existsSync(join(config, 'rex-scry.lua'));
   let required = false;
   try {
-    required = /require\s*\(?\s*["']rex-diagnostics["']/.test(readFileSync(join(config, 'init.lua'), 'utf8'));
+    required = /require\s*\(?\s*["']rex-scry["']/.test(readFileSync(join(config, 'init.lua'), 'utf8'));
   } catch {
     // no init.lua
   }
   check(
     luaInstalled && required ? 'ok' : 'warn',
     luaInstalled && required
-      ? 'Rex action installed (rex-diagnostics.lua required from init.lua)'
+      ? 'Rex action installed (rex-scry.lua required from init.lua)'
       : 'Rex action not installed: see README, "Rex action"',
   );
 

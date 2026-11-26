@@ -47,14 +47,14 @@ export interface WorkspaceState {
 }
 
 /**
- * Where state lives: $REX_DIAGNOSTICS_STATE_DIR, else $XDG_STATE_HOME/rex-diagnostics,
- * else ~/.local/state/rex-diagnostics. Only diagnostics and run metadata are
+ * Where state lives: $REX_SCRY_STATE_DIR, else $XDG_STATE_HOME/rex-scry,
+ * else ~/.local/state/rex-scry. Only diagnostics and run metadata are
  * stored, never raw terminal output.
  */
 export function stateDir(env: NodeJS.ProcessEnv = process.env): string {
-  if (env.REX_DIAGNOSTICS_STATE_DIR) return env.REX_DIAGNOSTICS_STATE_DIR;
+  if (env.REX_SCRY_STATE_DIR) return env.REX_SCRY_STATE_DIR;
   const base = env.XDG_STATE_HOME || join(homedir(), '.local', 'state');
-  return join(base, 'rex-diagnostics');
+  return join(base, 'rex-scry');
 }
 
 export function statePath(ws: Workspace, dir = stateDir()): string {
@@ -125,7 +125,7 @@ export function readState(ws: Workspace, dir = stateDir(), now = Date.now()): Wo
   try {
     parsed = JSON.parse(text) as WorkspaceState;
   } catch {
-    throw new Error(`corrupt state file ${path}: remove it, or run "rex-diagnostics clear --all-workspaces"`);
+    throw new Error(`corrupt state file ${path}: remove it, or run "rex-scry clear --all-workspaces"`);
   }
   if (typeof parsed.schemaVersion !== 'number' || parsed.schemaVersion > SCHEMA_VERSION || !Array.isArray(parsed.runs)) {
     throw new Error(`state file ${path} has schema ${String(parsed.schemaVersion)}, this version reads up to ${SCHEMA_VERSION}`);
